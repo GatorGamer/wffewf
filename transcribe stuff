@@ -1,0 +1,42 @@
+# Record audio
+        audio = pyaudio.PyAudio()
+
+        stream = audio.open(format=pyaudio.paInt16, channels=1, rate=44100, input=True, frames_per_buffer=1024)
+
+        frames = []
+
+        
+        # Variable to track whether stop record button is clicked
+        stop_record_clicked = False 
+
+        # Records while the stop record isn't clicked
+        while not stop_record_clicked:
+            data = stream.read(1024)
+            frames.append(data)
+
+            # Check if the stop record button is clicked
+            for event in pygame.event.get():
+                if event.type == pygame.MOUSEBUTTONDOWN:
+                    if stop_record_button.rect.collidepoint(event.pos):
+                        stop_record_clicked = True
+
+        print("Stopped recording.")
+        print("............................................................................................................................")
+        stream.stop_stream()
+        stream.close()
+        audio.terminate()
+
+        sound_file = wave.open("temp/chat.wav", "wb")
+        sound_file.setnchannels(1)
+        sound_file.setsampwidth(audio.get_sample_size(pyaudio.paInt16))
+        sound_file.setframerate(44100)
+        sound_file.writeframes(b''.join(frames))
+        sound_file.close()
+
+        print("Transcribing Audio...")
+        print("............................................................................................................................")
+
+        # Speech to Text
+        model = whisper.load_model('base')
+        result = model.transcribe('temp/chat.wav', fp16=False)
+	      usermessage = result['text']

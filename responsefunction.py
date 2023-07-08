@@ -1,5 +1,8 @@
 import os
 import openai
+import whisper
+import pyaudio
+import wave
 
 openai.api_key = os.getenv("OPENAI_API_KEY")
 
